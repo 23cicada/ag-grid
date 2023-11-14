@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { message } from 'antd'
+import React, { useCallback, useMemo, useState, useRef, useImperativeHandle } from 'react';
+import { message, Pagination } from 'antd'
 import { AgGridReact } from '@ag-grid-community/react';
 import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model'
 import {ClipboardModule} from '@ag-grid-enterprise/clipboard'
@@ -15,6 +15,7 @@ import {
     IServerSideGetRowsParams, ServerSideProps
 } from '@/types';
 import "./index.scss";
+import classnames from 'classname';
 
 LicenseManager.setLicenseKey("peakandyuri_MTc0NjU5ODM3NjkwMg==ed1b127f739302da69c456a8ea594dfd");
 
@@ -25,8 +26,12 @@ const AgGrid = React.forwardRef<AgGridReact, AgGridProps>(({
     rowModelType = 'clientSide',
     serverApi,
     onCellSeleted,
+    className,
+    style,
     ...props
 }, ref) => {
+
+    const agGridRef = useRef<AgGridReact>(null)
     /**
      * current：当前页
      * total：总条数
@@ -35,6 +40,8 @@ const AgGrid = React.forwardRef<AgGridReact, AgGridProps>(({
     const [pagination, setPagination] = useState<PaginationState>({
         current: 0, total: 0, size: 0
     })
+
+    useImperativeHandle(ref, () => agGridRef.current!, [])
 
     const serverSideProps: ServerSideProps|undefined = useMemo(() => {
         if (serverApi) {
@@ -81,20 +88,20 @@ const AgGrid = React.forwardRef<AgGridReact, AgGridProps>(({
         }
     }, [serverParams])
 
-    // /**
-    //  * antd Pagination onChange事件
-    //  * @param page 需要跳转的 页码
-    //  */
-    // const onCustomPagination: (page: number, pageSize: number) => void = (page) => {
-    //     agGridRef.current?.api?.paginationGoToPage(page - 1);
-    // }
-    // /**
-    //  * antd Pagination onShowSizeChange事件
-    //  * @param size 需要更改的 每页条数
-    //  */
-    // const onCustomPageSize: (current: number, size: number) => void = (_, size) => {
-    //     agGridRef.current?.api?.paginationSetPageSize(size)
-    // }
+    /**
+     * antd Pagination onChange事件
+     * @param page 需要跳转的 页码
+     */
+    const onCustomPagination: (page: number, pageSize: number) => void = (page) => {
+        agGridRef.current?.api?.paginationGoToPage(page - 1);
+    }
+    /**
+     * antd Pagination onShowSizeChange事件
+     * @param size 需要更改的 每页条数
+     */
+    const onCustomPageSize: (current: number, size: number) => void = (_, size) => {
+        agGridRef.current?.api?.paginationSetPageSize(size)
+    }
 
     /**
      * 第一次将数据呈现到网格中时触发
@@ -172,38 +179,51 @@ const AgGrid = React.forwardRef<AgGridReact, AgGridProps>(({
     }
 
     return (
-        <div className="ag-theme-alpine">
+        <div className={classnames(className, 'ag-theme-alpine')} style={style}>
             <AgGridReact
-            ref={ref}
-            rowModelType={rowModelType}
-            rowSelection="single"
-            modules={[
-                ClipboardModule,
-                MasterDetailModule,
-                ServerSideRowModelModule,
-                ClientSideRowModelModule,
-                RangeSelectionModule
-            ]}
-            overlayNoRowsTemplate="无数据"
-            overlayLoadingTemplate="加载中"
-            /**
-             * 失去焦点后完成编辑
-             */
-            stopEditingWhenCellsLoseFocus
-            /**
-             * 服务端模型需要新增的表格props
-             */
-            {...serverSideProps} 
-            {...props}
-            onPaginationChanged={onPaginationChanged}
-            onFirstDataRendered={onFirstDataRendered}
-            onCellDoubleClicked={onCellDoubleClicked}
-            onCellKeyDown={onCellKeyDown}
-            defaultColDef={{
-                resizable: true,
-                ...props.defaultColDef
-            }}
-        />
+                ref={agGridRef}
+                rowModelType={rowModelType}
+                rowSelection="single"
+                modules={[
+                    ClipboardModule,
+                    MasterDetailModule,
+                    ServerSideRowModelModule,
+                    ClientSideRowModelModule,
+                    RangeSelectionModule
+                ]}
+                overlayNoRowsTemplate="无数据"
+                overlayLoadingTemplate="加载中"
+                /**
+                 * 失去焦点后完成编辑
+                 */
+                stopEditingWhenCellsLoseFocus
+                suppressPaginationPanel
+                /**
+                 * 服务端模型需要新增的表格props
+                 */
+                {...serverSideProps} 
+                {...props}
+                onPaginationChanged={onPaginationChanged}
+                onFirstDataRendered={onFirstDataRendered}
+                onCellDoubleClicked={onCellDoubleClicked}
+                onCellKeyDown={onCellKeyDown}
+                paginationNumberFormatter={e => {
+                    return 'xxxhhh'
+                }}
+                defaultColDef={{
+                    resizable: true,
+                    ...props.defaultColDef
+                }}
+            />
+            <Pagination
+                showQuickJumper
+                onChange={onCustomPagination}
+                onShowSizeChange={onCustomPageSize}
+                showTotal={(total, range) => <span>第{range[0]} - {range[1]}条，共 {total} 条</span>}
+                total={pagination.total}
+                pageSize={pagination.size}
+                current={pagination.current}
+            />
         </div>
     )
 })

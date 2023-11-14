@@ -2,6 +2,7 @@ import { AgGridReactProps } from '@ag-grid-community/react';
 import { 
     RowModelType, ServerSideStoreType, IServerSideDatasource
  } from '@ag-grid-community/core';
+import { CSSProperties } from 'react';
 export * from '@ag-grid-community/core'
 
 export interface AgGridProps extends AgGridReactProps {
@@ -12,12 +13,15 @@ export interface AgGridProps extends AgGridReactProps {
     serverParams?: Record<string, any>,
 
     sizeColumnsToFit?: boolean;
+
     onCellSeleted?: (params: any) => void;
     /**
      * 自动选择第一行
      */
     autoFocusFirstRow?: boolean;
 
+    style?: CSSProperties
+    className?: string
 }
 
 export interface ServerApiParams extends Record<string, any> {
