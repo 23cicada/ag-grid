@@ -2,12 +2,17 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import AgGrid from './component'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
+      <AgGrid 
+        rowData={[{ test2: 'xxx', test3: 'hhh' }, { test2: 'XXXX', test3: 'HHHH' }]}
+        columnDefs={[{ headerName: 'test2' }, { headerName: 'test3 '}]}
+      />
       <div>
         <a href="https://vitejs.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
