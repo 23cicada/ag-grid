@@ -1,6 +1,6 @@
 
 import './App.css'
-import AgGrid from './component'
+import { AgGrid } from 'lib/component/ag-grid'
 
 function App() {
   const data = [

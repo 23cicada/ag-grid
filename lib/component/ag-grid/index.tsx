@@ -7,15 +7,17 @@ import {MasterDetailModule} from '@ag-grid-enterprise/master-detail'
 import {ServerSideRowModelModule} from '@ag-grid-enterprise/server-side-row-model'
 import {RangeSelectionModule} from '@ag-grid-enterprise/range-selection'
 import { LicenseManager } from '@ag-grid-enterprise/core';
+import classnames from 'classnames';
 import {
-    AgGridProps, PaginationState,
-   GridApi, ColumnApi,
+    GridApi, ColumnApi,
     PaginationChangedEvent, FirstDataRenderedEvent,
     CellDoubleClickedEvent, CellKeyDownEvent,
-    IServerSideGetRowsParams, ServerSideProps
-} from '@/types';
+    IServerSideGetRowsParams
+} from '@ag-grid-community/core'
 import "./index.scss";
-import classnames from 'classname';
+import styles from './index.module.scss'
+
+import { ServerSideProps, PaginationState, AgGridProps } from './types'
 
 LicenseManager.setLicenseKey("peakandyuri_MTc0NjU5ODM3NjkwMg==ed1b127f739302da69c456a8ea594dfd");
 
@@ -25,7 +27,7 @@ const AgGrid = React.forwardRef<AgGridReact, AgGridProps>(({
     autoFocusFirstRow = false,
     rowModelType = 'clientSide',
     serverApi,
-    onCellSeleted,
+    onCellSelected,
     className,
     style,
     ...props
@@ -158,7 +160,7 @@ const AgGrid = React.forwardRef<AgGridReact, AgGridProps>(({
      * @param event
      */
     const onCellDoubleClicked = (event: CellDoubleClickedEvent) => {
-        onCellSeleted && onCellSeleted(event.data)
+        onCellSelected && onCellSelected(event.data)
         if (props.onCellDoubleClicked !== undefined) {
             props.onCellDoubleClicked(event)
         }
@@ -171,7 +173,7 @@ const AgGrid = React.forwardRef<AgGridReact, AgGridProps>(({
     const onCellKeyDown = (event: CellKeyDownEvent) => {
         // @ts-ignore
         if (event.event.key === 'Enter') {
-            onCellSeleted && onCellSeleted(event.data)
+            onCellSelected && onCellSelected(event.data)
         }
         if (props.onCellKeyDown !== undefined) {
             props.onCellKeyDown(event)
@@ -196,8 +198,8 @@ const AgGrid = React.forwardRef<AgGridReact, AgGridProps>(({
                 /**
                  * 失去焦点后完成编辑
                  */
-                stopEditingWhenCellsLoseFocus
                 suppressPaginationPanel
+                stopEditingWhenCellsLoseFocus
                 /**
                  * 服务端模型需要新增的表格props
                  */
@@ -207,25 +209,23 @@ const AgGrid = React.forwardRef<AgGridReact, AgGridProps>(({
                 onFirstDataRendered={onFirstDataRendered}
                 onCellDoubleClicked={onCellDoubleClicked}
                 onCellKeyDown={onCellKeyDown}
-                paginationNumberFormatter={e => {
-                    return 'xxxhhh'
-                }}
                 defaultColDef={{
                     resizable: true,
                     ...props.defaultColDef
                 }}
             />
-            <Pagination
-                showQuickJumper
-                onChange={onCustomPagination}
-                onShowSizeChange={onCustomPageSize}
-                showTotal={(total, range) => <span>第{range[0]} - {range[1]}条，共 {total} 条</span>}
-                total={pagination.total}
-                pageSize={pagination.size}
-                current={pagination.current}
-            />
+            {props.pagination && (
+                <Pagination
+                    className={styles.pagination}
+                    onChange={onCustomPagination}
+                    onShowSizeChange={onCustomPageSize}
+                    showTotal={(total, range) => <span>第{range[0]} - {range[1]}条，共 {total} 条</span>}
+                    total={pagination.total}
+                    pageSize={pagination.size}
+                    current={pagination.current}
+                />
+            )}
         </div>
     )
 })
-
-export default AgGrid
+export { AgGrid }

@@ -3,9 +3,7 @@ import {
     RowModelType, ServerSideStoreType, IServerSideDatasource
  } from '@ag-grid-community/core';
 import { CSSProperties } from 'react';
-export * from '@ag-grid-community/core'
-
-export interface AgGridProps extends AgGridReactProps {
+interface AgGridProps extends AgGridReactProps {
     /* 表格数据请求 */
     serverApi?: ServerApi;
 
@@ -14,7 +12,7 @@ export interface AgGridProps extends AgGridReactProps {
 
     sizeColumnsToFit?: boolean;
 
-    onCellSeleted?: (params: any) => void;
+    onCellSelected?: (params: any) => void;
     /**
      * 自动选择第一行
      */
@@ -24,32 +22,47 @@ export interface AgGridProps extends AgGridReactProps {
     className?: string
 }
 
-export interface ServerApiParams extends Record<string, any> {
+interface ServerApiParams extends Record<string, any> {
     limit: number
     start: number
 }
-export interface ServerApiResult {
+interface ServerApiResult {
     status: number
     code: number
     result: { list: any[], total: number }
     error?: string
     msg?: string
 }
-export interface ServerApi {
+interface ServerApi {
     (params: ServerApiParams): Promise<ServerApiResult>
 }
 
-export interface PaginationState {
+/**
+ * 自定义 pagination Props
+ */
+interface PaginationState {
     current: number
     total: number
     size: number
 }
 
-export interface ServerSideProps {
+/**
+ * 服务端 ag-grid 额外Props
+ */
+interface ServerSideProps {
     pagination: boolean,
     rowModelType: RowModelType
     paginationPageSize: number
     cacheBlockSize: number
     serverSideStoreType: ServerSideStoreType
     serverSideDatasource: { getRows: IServerSideDatasource['getRows'] }
+}
+
+export type {
+    ServerApi,
+    ServerApiParams,
+    ServerApiResult,
+    PaginationState,
+    ServerSideProps,
+    AgGridProps
 }
