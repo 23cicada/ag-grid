@@ -10,12 +10,12 @@
       "require": "./dist/ymtx.umd.cjs"
     },
     "./dist/style.css": {
-      "import": "./dist/style.js"
+      "import": "./dist/style.css"
     }
   },
   "types": "./dist/index.d.ts",
   "name": "ymtx-ag-grid",
-  "version": "0.0.6",
+  "version": "0.0.8",
   "type": "module",
   "scripts": {
     "dev": "vite",
