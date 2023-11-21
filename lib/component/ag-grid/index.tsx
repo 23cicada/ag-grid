@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState, useRef, useImperativeHandle } from 'react';
+import React, { useMemo, useState, useRef, useImperativeHandle, Ref } from 'react';
 import { message, Pagination } from 'antd'
 import { AgGridReact } from '@ag-grid-community/react';
 import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model'
@@ -17,11 +17,13 @@ import {
 import "./index.scss";
 import styles from './index.module.scss'
 
-import { ServerSideProps, PaginationState, AgGridProps } from './types'
+import { ExtraProps, PaginationState, AgGridProps } from './types'
+import ServerHeaderComponent from "../components/server-header-component.tsx";
 
 LicenseManager.setLicenseKey("peakandyuri_MTc0NjU5ODM3NjkwMg==ed1b127f739302da69c456a8ea594dfd");
 
-const AgGrid = React.forwardRef<AgGridReact, AgGridProps>(({
+
+const AgGrid = React.forwardRef(<TData = any,>({
     serverParams,
     sizeColumnsToFit = true,
     autoFocusFirstRow = false,
@@ -30,8 +32,11 @@ const AgGrid = React.forwardRef<AgGridReact, AgGridProps>(({
     onCellSelected,
     className,
     style,
+    antdPaginationProps,
+    serverHeaderCheckboxSelectionCurrentPageOnly,
+    columnDefs,
     ...props
-}, ref) => {
+}: AgGridProps<TData>, ref: Ref<AgGridReact>) => {
 
     const agGridRef = useRef<AgGridReact>(null)
     /**
@@ -45,50 +50,70 @@ const AgGrid = React.forwardRef<AgGridReact, AgGridProps>(({
 
     useImperativeHandle(ref, () => agGridRef.current!, [])
 
-    const serverSideProps: ServerSideProps|undefined = useMemo(() => {
+    const columnDefsMemo = useMemo(() => {
+        if (serverHeaderCheckboxSelectionCurrentPageOnly && columnDefs?.length) {
+            const [firstColumn, ...others] = columnDefs
+            return [
+                {
+                    ...firstColumn,
+                    headerComponent: ServerHeaderComponent,
+                    checkboxSelection: true
+                },
+                ...others
+            ]
+        }
+        return columnDefs
+    }, [columnDefs])
+
+    const serverSideDatasource = useMemo(() => {
+        if (!serverApi) return undefined
+        return {
+            getRows: async (params: IServerSideGetRowsParams) => {
+                const { request: { startRow, endRow }, success, api, columnApi } = params
+                let rowData: TData[] = [], rowCount = 0;
+                try {
+                    const { status, code, error, msg, result } = await serverApi({
+                        ...serverParams, start: startRow!, limit: endRow! - startRow!
+                    })
+                    if (status === 200 && !code && result) {
+                        rowData = result.list
+                        rowCount = result.total
+                    } else if (error || msg) {
+                        message.error(error || msg);
+                    }
+                } catch {
+                    message.error("查询失败！");
+                }
+                if (rowData.length) {
+                    if (autoFocusFirstRow) {
+                        const pageSize = api.paginationGetPageSize()
+                        const current = api.paginationGetCurrentPage()
+                        onFocusFirstRow(pageSize * current, api, columnApi)
+                    }
+                    if (sizeColumnsToFit) {
+                        api.sizeColumnsToFit()
+                    }
+                }
+                success({ rowCount, rowData });
+            }
+        }
+    }, [serverParams])
+
+    const extraProps = useMemo(() => {
+        let props: ExtraProps = {}
         if (serverApi) {
-            return {
+            props = {
                 rowModelType: 'serverSide',
                 pagination: true,
                 paginationPageSize: 10,
-                cacheBlockSize: 50,
-                serverSideStoreType: 'partial',
-                serverSideDatasource: { getRows }
+                cacheBlockSize: 50
             }
         }
+        if (serverHeaderCheckboxSelectionCurrentPageOnly) {
+            props.rowSelection = 'multiple'
+        }
+        return props
     }, [])
-
-
-    const getRows = useCallback(async (params: IServerSideGetRowsParams) => {
-        if (serverApi) {
-            const { request: { startRow, endRow }, success, api, columnApi } = params
-            let rowData = [], rowCount = 0;
-            try {
-                const { status, code, error, msg, result } = await serverApi({
-                    ...serverParams, start: startRow!, limit: endRow! - startRow!
-                })
-                if (status === 200 && !code) {
-                    rowData = result.list
-                    rowCount = result.total
-                } else if (error || msg) {
-                    message.error(error || msg);
-                }
-            } catch {
-                message.error("查询失败！");
-            }
-            if (rowData.length) {
-                if (autoFocusFirstRow) {
-                    const pageSize = api.paginationGetPageSize()
-                    const current = api.paginationGetCurrentPage()
-                    onFocusFirstRow(pageSize * current, api, columnApi)
-                }
-                if (sizeColumnsToFit) {
-                    api.sizeColumnsToFit()
-                }
-            }
-            success({ rowCount, rowData });
-        }
-    }, [serverParams])
 
     /**
      * antd Pagination onChange事件
@@ -181,8 +206,9 @@ const AgGrid = React.forwardRef<AgGridReact, AgGridProps>(({
     }
 
     return (
-        <div className={classnames(className, 'ag-theme-alpine')} style={style}>
+        <div className={classnames('ag-theme-alpine', styles.container, className)} style={style}>
             <AgGridReact
+                containerStyle={{ height: 'initial', flex: 1 }}
                 ref={agGridRef}
                 rowModelType={rowModelType}
                 rowSelection="single"
@@ -200,10 +226,9 @@ const AgGrid = React.forwardRef<AgGridReact, AgGridProps>(({
                  */
                 suppressPaginationPanel
                 stopEditingWhenCellsLoseFocus
-                /**
-                 * 服务端模型需要新增的表格props
-                 */
-                {...serverSideProps} 
+                columnDefs={columnDefsMemo}
+                serverSideDatasource={serverSideDatasource}
+                {...extraProps}
                 {...props}
                 onPaginationChanged={onPaginationChanged}
                 onFirstDataRendered={onFirstDataRendered}
@@ -216,16 +241,22 @@ const AgGrid = React.forwardRef<AgGridReact, AgGridProps>(({
             />
             {props.pagination && (
                 <Pagination
+                    simple
                     className={styles.pagination}
                     onChange={onCustomPagination}
                     onShowSizeChange={onCustomPageSize}
-                    showTotal={(total, range) => <span>第{range[0]} - {range[1]}条，共 {total} 条</span>}
+                    showTotal={(total, range) => `第${range[0]} - ${range[1]}条，共 ${total} 条`}
                     total={pagination.total}
                     pageSize={pagination.size}
                     current={pagination.current}
+                    showSizeChanger={false}
+                    {...antdPaginationProps}
                 />
             )}
         </div>
     )
 })
 export { AgGrid }
+export * from './types.ts';
+export * from '@ag-grid-community/core'
+export * from '@ag-grid-community/react'

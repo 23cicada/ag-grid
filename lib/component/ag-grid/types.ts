@@ -1,11 +1,12 @@
 import { AgGridReactProps } from '@ag-grid-community/react';
 import { 
-    RowModelType, ServerSideStoreType, IServerSideDatasource
+    RowModelType, IServerSideDatasource
  } from '@ag-grid-community/core';
 import { CSSProperties } from 'react';
-interface AgGridProps extends AgGridReactProps {
+import {PaginationProps} from "antd/es/pagination/Pagination";
+interface AgGridProps<TData = any> extends AgGridReactProps<TData> {
     /* 表格数据请求 */
-    serverApi?: ServerApi;
+    serverApi?: ServerApi<TData>;
 
     /* 表格数据请求参数 */
     serverParams?: Record<string, any>,
@@ -20,21 +21,24 @@ interface AgGridProps extends AgGridReactProps {
 
     style?: CSSProperties
     className?: string
+
+    antdPaginationProps?: PaginationProps
+
+    /**
+     * 服务器模型，页眉复选框选择将只选择当前页面上的节点
+     */
+    serverHeaderCheckboxSelectionCurrentPageOnly?: boolean
 }
 
-interface ServerApiParams extends Record<string, any> {
-    limit: number
-    start: number
-}
-interface ServerApiResult {
-    status: number
-    code: number
-    result: { list: any[], total: number }
+interface ServerApiResult<TData> {
+    status?: number
+    code?: number
+    result?: { list: TData[], total: number }
     error?: string
     msg?: string
 }
-interface ServerApi {
-    (params: ServerApiParams): Promise<ServerApiResult>
+interface ServerApi<TData> {
+    (params: any): Promise<ServerApiResult<TData>>
 }
 
 /**
@@ -47,22 +51,25 @@ interface PaginationState {
 }
 
 /**
- * 服务端 ag-grid 额外Props
+ * 额外Props
  */
-interface ServerSideProps {
-    pagination: boolean,
-    rowModelType: RowModelType
-    paginationPageSize: number
-    cacheBlockSize: number
-    serverSideStoreType: ServerSideStoreType
-    serverSideDatasource: { getRows: IServerSideDatasource['getRows'] }
+interface ExtraProps {
+    /**
+     * 服务端表格props
+     */
+    pagination?: boolean,
+    rowModelType?: RowModelType
+    paginationPageSize?: number
+    cacheBlockSize?: number
+    serverSideDatasource?: { getRows: IServerSideDatasource['getRows'] }
+
+    rowSelection?: 'single' | 'multiple'
 }
 
 export type {
     ServerApi,
-    ServerApiParams,
     ServerApiResult,
     PaginationState,
-    ServerSideProps,
+    ExtraProps,
     AgGridProps
 }

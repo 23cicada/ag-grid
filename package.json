@@ -1,27 +1,22 @@
 {
-  "files": [
-    "dist"
-  ],
-  "main": "./dist/ymtx.umd.cjs",
-  "module": "./dist/ymtx.js",
-  "exports": {
-    ".": {
-      "import": "./dist/ymtx.js",
-      "require": "./dist/ymtx.umd.cjs"
-    },
-    "./dist/style.css": {
-      "import": "./dist/style.css"
-    }
-  },
   "types": "./dist/index.d.ts",
-  "name": "ymtx-ag-grid",
-  "version": "0.0.8",
+  "name": "@ymtx/ag-grid",
+  "version": "0.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
+  },
+  "files": ["dist"],
+  "main": "./dist/ag-grid.umd.cjs",
+  "module": "./dist/ag-grid.js",
+  "exports": {
+    ".": {
+      "import": "./dist/ag-grid.js",
+      "require": "./dist/ag-grid.umd.cjs"
+    }
   },
   "dependencies": {
     "@ag-grid-community/client-side-row-model": "^30.2.1",
@@ -51,11 +46,12 @@
     "rollup-plugin-visualizer": "^5.9.2",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
+    "vite-plugin-css-injected-by-js": "^3.3.0",
     "vite-plugin-dts": "^3.6.3"
   },
   "peerDependencies": {
-    "antd": ">=5.0.0",
-    "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
+    "antd": ">=4.16.6",
+    "react": ">=16.7.0",
+    "react-dom": ">=16.7.0"
   }
 }

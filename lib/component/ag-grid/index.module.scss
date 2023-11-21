@@ -1,4 +1,14 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
 .pagination {
-  text-align: right;
-  margin-top: 10px;
+  display: flex;
+  align-items: baseline;
+  justify-content: end;
+  border: 1px solid var(--ag-border-color);
+  border-top: none;
+  padding: 2px 0;
+  background: #ffffff;
 }
