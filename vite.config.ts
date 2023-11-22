@@ -9,8 +9,10 @@ import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
 export default defineConfig({
   plugins: [
     react(),
-    visualizer(),
-    dts({ include: [path.resolve(__dirname, "lib")]}),
+    // visualizer(),
+    dts({
+      include: [path.resolve(__dirname, "lib")]
+    }),
     cssInjectedByJsPlugin(),
   ],
   resolve: {

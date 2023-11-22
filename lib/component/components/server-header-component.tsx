@@ -18,6 +18,7 @@ const ServerHeaderComponent = ({ displayName, api }: IHeaderParams) => {
 
     const onSelectionChanged = ({ api }: SelectionChangedEvent) => {
         const nodes = getPageDisplayedNodes(api)
+        if (nodes.length === 0) return;
         const every = nodes.every(item => item.selected)
         const some = nodes.some(item => item.selected)
         setChecked(every)

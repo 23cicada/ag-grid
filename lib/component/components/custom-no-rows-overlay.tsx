@@ -1,0 +1,10 @@
+import { Empty } from 'antd'
+
+const CustomNoRowsOverlay = (props: any) => {
+    console.log(props)
+    return (
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={props.noRowsMessageFunc()} />
+    )
+}
+
+export default CustomNoRowsOverlay

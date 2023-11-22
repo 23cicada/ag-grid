@@ -30,12 +30,8 @@ interface AgGridProps<TData = any> extends AgGridReactProps<TData> {
     serverHeaderCheckboxSelectionCurrentPageOnly?: boolean
 }
 
-interface ServerApiResult<TData> {
-    status?: number
-    code?: number
+interface ServerApiResult<TData = any> {
     result?: { list: TData[], total: number }
-    error?: string
-    msg?: string
 }
 interface ServerApi<TData> {
     (params: any): Promise<ServerApiResult<TData>>
