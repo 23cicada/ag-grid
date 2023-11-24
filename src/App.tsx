@@ -28,7 +28,7 @@ function App() {
         // cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzUxMiJ9.eyJpYXQiOjE3MDA2MzExMzAsImV4cCI6MTcwMDYzNDczMCwianRpIjoiOWU2ZTkwNDgyNjg4NGFmNGE0ZmE3ZDQzN2M5ZTE1YmEiLCJ1aWQiOiI0Mzc4OTgxMDEwNTU4MTk3NzYiLCJ0eXBlIjoyfQ.k0IiTjlSLYjC9kDIAqFIB1oZKyp23_phuXA4qrbkh190G142qbEj5J2vgfhiWbBt8KcmEGFhI0h_v6KCfvcXDtBn0s5OSSbzcnkeE61n3jZOAUeQ2JEfWTbsMmXmmdvIFesb5KwRTnYHfv8oQr0mhxWL_YIaWAsMviTNfAXzk5I"
+          "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzUxMiJ9.eyJpYXQiOjE3MDA3OTA2MjQsImV4cCI6MTcwMDc5NDIyNCwianRpIjoiY2U0ODQxNzU3OTcwNDI5N2JjM2U3ZWJjNWEyMDM5YjciLCJ1aWQiOiI0Mzc4OTgxMDEwNTU4MTk3NzYiLCJ0eXBlIjoyfQ.G1eHwSGDPtanLXsxt_QZmRz2nY5naTOrEN7yFbb8K76MJMRs5EGa3HFEEDDxrTCjRtZ4DseUgeOuqb0gW9j1rayJcAN2aubTwPTHufPDawXnV6Qh5z9bRfIN3BJfHowuafAUjaxd82bexjrSfqigI-RMTgh_N0dmSCDfwKJ6bck"
         },
         // redirect: "follow", // manual, *follow, error
         // referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
@@ -47,15 +47,14 @@ function App() {
     <div>
       <Button onClick={() => setCount({ d: count.d + 1})}>{count.d}</Button>
       <AgGrid<DataTest>
-        style={{ height: 400 }}
         serverApi={api}
         columnDefs={[{ headerName: 'name', field: 'name' }, { headerName: 'age', field: 'age' }]}
         sizeColumnsToFit
         pagination
-        cacheBlockSize={12}
-        paginationPageSize={6}
+        paginationPageSize={10}
         serverHeaderCheckboxSelectionCurrentPageOnly
         autoFocusFirstRow
+        domLayout="autoHeight"
       />
     </div>
   )

@@ -1,5 +1,4 @@
-import React, { useMemo, useState, useRef, useImperativeHandle, Ref } from 'react';
-import { Pagination } from 'antd'
+import React, { useMemo, useRef, useImperativeHandle, Ref } from 'react';
 import { AgGridReact } from '@ag-grid-community/react';
 import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model'
 import {ClipboardModule} from '@ag-grid-enterprise/clipboard'
@@ -12,17 +11,17 @@ import {
     GridApi, ColumnApi,
     PaginationChangedEvent, FirstDataRenderedEvent,
     CellDoubleClickedEvent, CellKeyDownEvent,
-    IServerSideGetRowsParams
+    IServerSideGetRowsParams, NavigateToNextCellParams
 } from '@ag-grid-community/core'
 import "./index.scss";
 import styles from './index.module.scss'
 
-import { ExtraProps, PaginationState, AgGridProps } from './types'
+import { ExtraProps, AgGridProps } from './types'
 import ServerHeaderComponent from "../components/server-header-component.tsx";
 import CustomNoRowsOverlay from "lib/component/components/custom-no-rows-overlay.tsx";
 import CustomLoadingOverlay from "lib/component/components/custom-loading-overlay.tsx";
 import {GridReadyEvent} from "@ag-grid-community/core/dist/esm/es6/events";
-import {NavigateToNextCellParams} from "@ag-grid-community/core/dist/esm/es6/interfaces/iCallbackParams";
+import CustomPagination, { CustomPaginationRef } from '../components/custom-pagination.tsx'
 
 LicenseManager.setLicenseKey("peakandyuri_MTc0NjU5ODM3NjkwMg==ed1b127f739302da69c456a8ea594dfd");
 
@@ -43,14 +42,7 @@ const AgGrid = React.forwardRef(<TData = any,>({
 }: AgGridProps<TData>, ref: Ref<AgGridReact>) => {
 
     const agGridRef = useRef<AgGridReact>(null)
-    /**
-     * current：当前页
-     * total：总条数
-     * size: 每页条数
-     */
-    const [pagination, setPagination] = useState<PaginationState>({
-        current: 0, total: 0, size: 0
-    })
+    const antPaginationRef = useRef<CustomPaginationRef>(null)
 
     useImperativeHandle(ref, () => agGridRef.current!, [])
 
@@ -107,25 +99,10 @@ const AgGrid = React.forwardRef(<TData = any,>({
         }
         if (serverHeaderCheckboxSelectionCurrentPageOnly) {
             props.rowSelection = 'multiple'
+            props.rowMultiSelectWithClick = true
         }
         return props
     }, [])
-
-    /**
-     * antd Pagination onChange事件
-     * @param page 需要跳转的 页码
-     */
-    const onCustomPagination: (page: number, pageSize: number) => void = (page) => {
-        agGridRef.current?.api?.paginationGoToPage(page - 1);
-    }
-    /**
-     * antd Pagination onShowSizeChange事件
-     * @param _
-     * @param size 需要更改的 每页条数
-     */
-    const onCustomPageSize: (current: number, size: number) => void = (_, size) => {
-        agGridRef.current?.api?.paginationSetPageSize(size)
-    }
 
     /**
      * 第一次将数据呈现到网格中时触发
@@ -154,10 +131,11 @@ const AgGrid = React.forwardRef(<TData = any,>({
         const model = api.getModel().getType()
         const pageSize = api.paginationGetPageSize()
         const current = api.paginationGetCurrentPage()
-        setPagination({
-            current: api.paginationGetCurrentPage() + 1,
-            total: api.paginationGetRowCount(),
-            size: api.paginationGetPageSize()
+        const total = api.paginationGetRowCount()
+        antPaginationRef.current?.setPagination({
+            current: current + 1,
+            total,
+            size: pageSize
         })
         if (autoFocusFirstRow && newPage) {
             switch (model) {
@@ -249,6 +227,47 @@ const AgGrid = React.forwardRef(<TData = any,>({
         return suggestedNextCell;
     };
 
+    const onCustomPagination: (page: number, pageSize: number) => void = (page) => {
+        agGridRef.current?.api.paginationGoToPage(page - 1);
+    }
+    /**
+     * antd Pagination onShowSizeChange事件
+     * @param _
+     * @param size 需要更改的 每页条数
+     */
+    const onCustomPageSize: (current: number, size: number) => void = (_, size) => {
+        agGridRef.current?.api.paginationSetPageSize(size)
+    }
+
+    const modules = useMemo(() => {
+        return [
+            ClipboardModule,
+            MasterDetailModule,
+            ServerSideRowModelModule,
+            ClientSideRowModelModule,
+            RangeSelectionModule
+        ]
+    }, [])
+
+    const noRowsOverlayComponentParams = useMemo(() => ({
+        noRowsMessageFunc: () => '暂无数据'
+    }), [])
+
+    const loadingOverlayComponentParams = useMemo(() => ({
+        loadingMessage: '加载中...'
+    }), [])
+
+    const localeText = useMemo(() => ({
+        loadingOoo: '加载中...'
+    }), [])
+
+    const defaultColDef = useMemo(() => {
+        return {
+            resizable: true,
+            ...props.defaultColDef
+        }
+    }, [])
+
     return (
         <div className={classnames('ag-theme-alpine', styles.container, className)} style={style}>
             <AgGridReact
@@ -256,13 +275,7 @@ const AgGrid = React.forwardRef(<TData = any,>({
                 ref={agGridRef}
                 rowModelType={rowModelType}
                 rowSelection="single"
-                modules={[
-                    ClipboardModule,
-                    MasterDetailModule,
-                    ServerSideRowModelModule,
-                    ClientSideRowModelModule,
-                    RangeSelectionModule
-                ]}
+                modules={modules}
                 overlayNoRowsTemplate="无数据"
                 overlayLoadingTemplate="加载中"
                 /**
@@ -278,17 +291,13 @@ const AgGrid = React.forwardRef(<TData = any,>({
                  * https://www.ag-grid.com/react-data-grid/overlays/
                  */
                 noRowsOverlayComponent={CustomNoRowsOverlay}
-                noRowsOverlayComponentParams={{
-                    noRowsMessageFunc: () => '暂无数据'
-                }}
+                noRowsOverlayComponentParams={noRowsOverlayComponentParams}
                 loadingOverlayComponent={CustomLoadingOverlay}
-                loadingOverlayComponentParams={{
-                    loadingMessage: '加载中...'
-                }}
+                loadingOverlayComponentParams={loadingOverlayComponentParams}
                 /*
                 * server-side 模型 加载中提示
                 * */
-                localeText={{ loadingOoo: '加载中...'}}
+                localeText={localeText}
 
                 {...extraProps}
                 {...props}
@@ -298,22 +307,13 @@ const AgGrid = React.forwardRef(<TData = any,>({
                 onFirstDataRendered={onFirstDataRendered}
                 onCellDoubleClicked={onCellDoubleClicked}
                 onCellKeyDown={onCellKeyDown}
-                defaultColDef={{
-                    resizable: true,
-                    ...props.defaultColDef
-                }}
+                defaultColDef={defaultColDef}
             />
             {props.pagination && (
-                <Pagination
-                    simple
-                    className={styles.pagination}
+                <CustomPagination
+                    ref={antPaginationRef}
                     onChange={onCustomPagination}
                     onShowSizeChange={onCustomPageSize}
-                    showTotal={(total, range) => `第${range[0]} - ${range[1]}条，共 ${total} 条`}
-                    total={pagination.total}
-                    pageSize={pagination.size}
-                    current={pagination.current}
-                    showSizeChanger={false}
                     {...antdPaginationProps}
                 />
             )}

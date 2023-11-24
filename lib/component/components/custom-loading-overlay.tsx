@@ -1,7 +1,6 @@
 import {Spin} from "antd";
 
 const CustomLoadingOverlay = (props: any) => {
-    console.log(props)
     return (
         <>
             <Spin />

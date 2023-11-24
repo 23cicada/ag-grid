@@ -60,6 +60,7 @@ interface ExtraProps {
     serverSideDatasource?: { getRows: IServerSideDatasource['getRows'] }
 
     rowSelection?: 'single' | 'multiple'
+    rowMultiSelectWithClick?: boolean
 }
 
 export type {
