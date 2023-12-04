@@ -13,7 +13,7 @@ import {
     CellDoubleClickedEvent, CellKeyDownEvent,
     IServerSideGetRowsParams, NavigateToNextCellParams
 } from '@ag-grid-community/core'
-import "./index.scss";
+import "./ymtx-ag-grid.scss";
 import styles from './index.module.scss'
 
 import { ExtraProps, AgGridProps } from './types'
@@ -269,8 +269,9 @@ const AgGrid = React.forwardRef(<TData = any,>({
     }, [])
 
     return (
-        <div className={classnames('ag-theme-alpine', styles.container, className)} style={style}>
+        <div className={classnames('ymtx-ag-grid', styles.container, className)} style={style}>
             <AgGridReact
+                className="ag-theme-alpine"
                 containerStyle={{ height: 'initial', flex: 1 }}
                 ref={agGridRef}
                 rowModelType={rowModelType}
@@ -285,6 +286,7 @@ const AgGrid = React.forwardRef(<TData = any,>({
                 stopEditingWhenCellsLoseFocus
                 columnDefs={columnDefsMemo}
                 serverSideDatasource={serverSideDatasource}
+                suppressCopyRowsToClipboard
 
                 /**
                  * 以下4个属性只适用 client-side 模型

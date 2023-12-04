@@ -1,15 +1,14 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
-import { visualizer } from "rollup-plugin-visualizer";
 import dts from 'vite-plugin-dts'
 import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
+import prefixer from 'postcss-prefix-selector';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
-    // visualizer(),
     dts({
       include: [path.resolve(__dirname, "lib")]
     }),
@@ -29,6 +28,16 @@ export default defineConfig({
     },
     rollupOptions: {
       external: ['antd', 'react', 'react-dom']
+    }
+  },
+  css: {
+    postcss: {
+      plugins: [
+        prefixer({
+          prefix: '.ymtx-ag-grid',
+          includeFiles: ['ymtx-ag-grid.scss']
+        }),
+      ]
     }
   }
 })

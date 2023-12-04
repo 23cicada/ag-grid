@@ -9,7 +9,9 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/ag-grid.umd.cjs",
   "module": "./dist/ag-grid.js",
   "exports": {
@@ -28,6 +30,7 @@
     "@ag-grid-enterprise/master-detail": "^30.2.1",
     "@ag-grid-enterprise/range-selection": "^30.2.1",
     "@ag-grid-enterprise/server-side-row-model": "^30.2.1",
+    "postcss-prefix-selector": "^1.16.0",
     "sass": "^1.69.5"
   },
   "devDependencies": {

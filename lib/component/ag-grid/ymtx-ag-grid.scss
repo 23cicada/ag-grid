@@ -1,0 +1,8 @@
+/**
+不要修改此文件名
+不要在此文件中写入无关ag-grid样式
+项目其他scss文件不要以ymtx-ag-grid命名
+此文件中的类名会自动加上ymtx-ag-grid前缀
+ */
+@use "@ag-grid-community/styles" as ag;
+@include ag.grid-styles();
