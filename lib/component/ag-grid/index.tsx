@@ -207,14 +207,6 @@ const AgGrid = React.forwardRef(<TData = any,>({
          */
         const suggestedNextCell = params.nextCellPosition;
 
-        const KEY_UP = 'ArrowUp';
-        const KEY_DOWN = 'ArrowDown';
-
-        const noUpOrDownKey = params.key !== KEY_DOWN && params.key !== KEY_UP;
-        if (noUpOrDownKey) {
-            return suggestedNextCell;
-        }
-
         params.api.forEachNode(node => {
             if (node.rowIndex === suggestedNextCell?.rowIndex) {
                 node.setSelected(true);

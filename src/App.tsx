@@ -55,6 +55,7 @@ function App() {
         serverHeaderCheckboxSelectionCurrentPageOnly
         autoFocusFirstRow
         domLayout="autoHeight"
+        suppressPaginationPanel={false}
       />
     </div>
   )
